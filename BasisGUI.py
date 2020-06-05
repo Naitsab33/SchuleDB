@@ -43,21 +43,21 @@ class BasisGUI(MasterGUI):
 
         self.helpmenu = Menu(self.menu, tearoff=0)
         self.menu.add_cascade(label="  Hilfe  ", menu=self.helpmenu)
-        self.helpmenu.add_command(label='Alle Tabellen inkl. Attribute', \
+        self.helpmenu.add_command(label='Alle Tabellen inkl. Attribute',
                                   command=self.alleTabellenKommando)
-        self.helpmenu.add_command(label='Datenbankabfrage', \
+        self.helpmenu.add_command(label='Datenbankabfrage',
                                   command=self.helpSelectKommando)
-        self.helpmenu.add_command(label='Datensatz einfügen', \
+        self.helpmenu.add_command(label='Datensatz einfügen',
                                   command=self.helpInsertKommando)
-        self.helpmenu.add_command(label='Datensatz aktualisieren', \
+        self.helpmenu.add_command(label='Datensatz aktualisieren',
                                   command=self.helpUpdateKommando)
-        self.helpmenu.add_command(label='Datensatz löschen', \
+        self.helpmenu.add_command(label='Datensatz löschen',
                                   command=self.helpDeleteKommando)
-        self.helpmenu.add_command(label='Tabelle anlegen', \
+        self.helpmenu.add_command(label='Tabelle anlegen',
                                   command=self.helpCreateKommando)
-        self.helpmenu.add_command(label='Tabelle löschen', \
+        self.helpmenu.add_command(label='Tabelle löschen',
                                   command=self.helpDropKommando)
-        self.helpmenu.add_command(label='View anlegen', \
+        self.helpmenu.add_command(label='View anlegen',
                                   command=self.helpViewKommando)
         self.menu.add_command(label='  Beenden  ', command=self.destroyCmd)
 
@@ -181,8 +181,8 @@ class BasisGUI(MasterGUI):
         ergv = ScrolledTextGUI(breite=36 * 3, hoehe=9 * 3)
         self.ergGUIs.append(ergv)
         ergv.zeigeAn(text)
-        ergv.fenster.title("GHO - Daten abfragen")
-        ergv.fenster.mainloop()
+        ergv.title("GHO - Daten abfragen")
+        ergv.mainloop()
 
     def helpInsertKommando(self):
         text = """
@@ -424,5 +424,5 @@ class BasisGUI(MasterGUI):
 
 
 if __name__ == "__main__":
-    bgui = BasisGUI(db="videocenter.db")
+    bgui = BasisGUI(db="unterricht.db")
     bgui.startGUI()

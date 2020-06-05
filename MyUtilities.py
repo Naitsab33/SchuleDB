@@ -1,4 +1,7 @@
 from tkinter import *
+from typing import Callable, Union, Sequence
+
+SeqOrReturnsSeq = Union[Sequence, Callable[[], Sequence]]
 
 
 class MasterGUI(Tk):
@@ -11,14 +14,16 @@ class MasterGUI(Tk):
             # falls das Fenster bereits manuell geschlossen wurde:
             try:
                 el.destroyCmd()
-            except:
+            except Exception as e:
                 pass
-        self.destroy()
+        # Ich habe die Methode destroy verändert -> daher der super call auf die Original-Methode
+        super(MasterGUI, self).destroy()
 
 
-class TableFormat(object):
-    @classmethod
-    def table2text(self, table, zn):
+class TableFormat:
+    # Es reicht aus, dass diese methode static ist.
+    @staticmethod
+    def table2text(table, zn):
         zeilen = len(table)
         spalten = len(table[0])
         breiten = spalten * [3]
@@ -45,9 +50,10 @@ class TableFormat(object):
         return text
 
 
-class TextFormat(object):
-    @classmethod
-    def formatText(self, text):
+class TextFormat:
+    # Es reicht aus, dass diese methode static ist.
+    @staticmethod
+    def formatText(text):
         retString = ""
         for c in text:
             if ord(c) <= 128:
@@ -68,7 +74,7 @@ class TextFormat(object):
                 retString += "ss"
             else:
                 retString += "?"
-        retString = retString.lstrip().rstrip()
+        retString = retString.strip()
         return retString
 
 
@@ -197,7 +203,7 @@ class ScrolledFrame(object):
 
 
 class ScrolledTable(ScrolledFrame):
-    ''' Tabelle in einem Scroll-Rahmen.
+    """ Tabelle in einem Scroll-Rahmen.
         Nicht geeignet für Tabellen mit deutlich mehr als 1000 Zeilen!
 
         Keyword-Argumente:
@@ -214,7 +220,7 @@ class ScrolledTable(ScrolledFrame):
         width: Breite des Frames                   Beispiel: width = 400
         height: Höhe des Frames                    Beispiel: height = 600
         debug: Wahwert für Debug-Ausgaben          Beispiel: debug = False
-    '''
+    """
 
     def __init__(self, master, **kwargs):
         # speichere den Wert des Keys (hier: debug)
@@ -237,8 +243,8 @@ class ScrolledTable(ScrolledFrame):
         self.labels = []
 
     def anzeige(self, tabelle, schreibschutz=True):
-        ''' Anzeige einer Tabelle im Scroll-Rahmen.
-        '''
+        """ Anzeige einer Tabelle im Scroll-Rahmen.
+        """
         self.loeschen()
         self.anzahlZeilen = len(tabelle)
 
@@ -325,13 +331,13 @@ class ScrolledTextGUI(MasterGUI):
         self.rahmen = Frame(master=self)
         self.scrollbarY = Scrollbar(master=self.rahmen)
         self.scrollbarX = Scrollbar(master=self.rahmen, orient=HORIZONTAL)
-        self.anzeige = Text(master=self.rahmen, \
-                            font=('Courier New', 10), \
-                            bg="light green", \
-                            width=breite, \
-                            height=hoehe, \
-                            wrap=NONE, \
-                            yscrollcommand=self.scrollbarY.set, \
+        self.anzeige = Text(master=self.rahmen,
+                            font=('Courier New', 10),
+                            bg="light green",
+                            width=breite,
+                            height=hoehe,
+                            wrap=NONE,
+                            yscrollcommand=self.scrollbarY.set,
                             xscrollcommand=self.scrollbarX.set)
         self.scrollbarY.config(command=self.anzeige.yview)
         self.scrollbarX.config(command=self.anzeige.xview)

@@ -21,10 +21,10 @@ class DB_Tool:
         self.user = kwargs.pop('user', None)
         self.password = kwargs.pop('password', None)
         self.db = kwargs.pop('db', None)
-        if self.host != None and self.user != None and \
-                self.password != None and self.db != None:
+        if self.host is not None and self.user is not None and \
+                self.password is not None and self.db is not None:
             self.type = "MySQL"
-        elif self.db != None:
+        elif self.db is not None:
             self.type = "SQLite"
 
     def execute(self, stmt, val=None):
@@ -38,7 +38,8 @@ class DB_Tool:
             # MySQL
             if self.type == "MySQL":
                 self.connection = mysql.connector.connect(host=self.host,
-                                                          user=self.user, password=self.password,
+                                                          user=self.user,
+                                                          password=self.password,
                                                           db=self.db)
                 self.cursor = self.connection.cursor()
             elif self.type == "SQLite":
@@ -60,15 +61,17 @@ class DB_Tool:
                     for e in fetch:
                         liste.append([e[0]])
                 elif stmt.startswith("DESCRIBE"):
-                    stmt = "SELECT sql FROM sqlite_master WHERE name = '" + stmt.replace("DESCRIBE ", "") + "';"
+                    stmt = "SELECT sql FROM sqlite_master WHERE name = '" + stmt.replace(
+                        "DESCRIBE ", "") + "';"
                     self.cursor.execute(stmt)
                     liste = []
                     fetch = self.cursor.fetchall()
                     for e in fetch:
                         liste.append([e[0]])
                 elif stmt.startswith("SHOW COLUMNS FROM "):
-                    stmt = "PRAGMA table_info('" + stmt.replace("SHOW COLUMNS FROM ", "").replace(";", "").replace(" ",
-                                                                                                                   "") + "');"
+                    stmt = "PRAGMA table_info('" + stmt.replace(
+                        "SHOW COLUMNS FROM ", "").replace(";", "").replace(" ",
+                                                                           "") + "');"
                     self.cursor.execute(stmt)
                     liste = []
                     fetch = self.cursor.fetchall()
@@ -93,16 +96,17 @@ class DB_Tool:
                     for k in e:
                         zeile.append(str(k))
                     liste.append(zeile)
-            elif stmt.upper().startswith("INSERT") or stmt.upper().startswith("UPDATE"):
+            elif stmt.upper().startswith("INSERT") or stmt.upper().startswith(
+                    "UPDATE"):
                 self.cursor.execute(stmt)
                 self.connection.commit()
             else:
                 self.cursor.execute(stmt)
             self.connection.close()
-        except:
-            print(f"An error occured.")
+        except Exception as e:
+            print(e)
             success = False
-        return (success, liste)
+        return success, liste
 
     def alleTabellen(self):
         erg = self.execute("SHOW TABLES")
@@ -133,7 +137,7 @@ class DB_Tool:
         """
         tabelle = None
         stmt = ""
-        if proj != None and tab != None and sel != None:
+        if proj is not None and tab is not None and sel is not None:
             # nur Sortierung:
             if sel.upper().startswith('ORDER'): sel = '1 ' + sel
             # nur Gruppierung:
@@ -141,6 +145,7 @@ class DB_Tool:
 
             stmt = "SELECT " + proj + " FROM " + tab + " WHERE " + sel + ";"
             (erfolg, selerg) = self.execute(stmt)
+
             if erfolg:
                 ueberschrift = []
                 attribute = []
@@ -156,7 +161,8 @@ class DB_Tool:
                 # Es dürfen nur so viele Attribute genommen werden, wie es Spalten gibt.
                 for i in range(min(len(selerg[0]), len(attribute))):
                     # DISTINCT wird ignoriert
-                    a = attribute[i].replace("DISTINCT", "").replace("distinct", "")
+                    a = attribute[i].replace("DISTINCT", "").replace("distinct",
+                                                                     "")
                     # AS wird berücksichtigt
                     if " AS " in a:
                         a = a.split(" AS ")[1]
@@ -169,7 +175,7 @@ class DB_Tool:
                 # Dann kommen die Ergebniszeilen.
                 for e in selerg:
                     tabelle.append(e)
-        return (tabelle, stmt)
+        return tabelle, stmt
 
 
 if __name__ == "__main__":
@@ -268,9 +274,12 @@ if __name__ == "__main__":
             "INSERT INTO schueler ( Nachname, Vorname, Gebjahr, Gebmonat, Gebtag ) VALUES ( 'Mainzel', 'Berti', '1964', '4', '2' ); ")
         db.execute(
             "INSERT INTO schueler ( Nachname, Vorname, Gebjahr, Gebmonat ) VALUES ( 'Mainzel', 'Conny', '1964', '4' ); ")
-        db.execute("INSERT INTO schueler ( Nachname, Vorname, Gebjahr ) VALUES ( 'Mainzel', 'Det', '1964' ); ")
-        db.execute("INSERT INTO schueler ( Nachname, Vorname ) VALUES ( 'Mainzel', 'Eddy' ); ")
-        db.execute("INSERT INTO schueler ( Nachname, Vorname ) VALUES ( 'Mainzel', 'Fritzchen' ); ")
+        db.execute(
+            "INSERT INTO schueler ( Nachname, Vorname, Gebjahr ) VALUES ( 'Mainzel', 'Det', '1964' ); ")
+        db.execute(
+            "INSERT INTO schueler ( Nachname, Vorname ) VALUES ( 'Mainzel', 'Eddy' ); ")
+        db.execute(
+            "INSERT INTO schueler ( Nachname, Vorname ) VALUES ( 'Mainzel', 'Fritzchen' ); ")
         db.execute(
             "INSERT INTO schueler ( Nachname, Vorname, Gebjahr, Gebmonat, Gebtag, Geschlecht ) VALUES ( 'König', 'Leopold', '1846', '2', '9', 'm' ); ")
         db.execute(
@@ -325,20 +334,30 @@ if __name__ == "__main__":
         print("\nSchüler\n")
         print(db.execute("SELECT * FROM schueler ORDER BY ID;"))
 
-        db.execute("INSERT INTO lehrer VALUES ( 'FiA',  'Fischer',   'Andreas',  'Herr' ); ")
-        db.execute("INSERT INTO lehrer VALUES ( 'Pohl', 'Pohl',      'Matthias', 'Herr' ); ")
-        db.execute("INSERT INTO lehrer VALUES ( 'Smy',  'Smykowski', 'Adam',     'Dr'   ); ")
-        db.execute("INSERT INTO lehrer VALUES ( 'Dob',  'Dobberow',  'Anja',     'Frau' ); ")
-        db.execute("INSERT INTO lehrer VALUES ( 'Bad',  'Bader',     'Mark',     'Dr'   ); ")
-        db.execute("INSERT INTO lehrer VALUES ( 'Hen',  'Henke',     'Jörg',     'Herr' ); ")
+        db.execute(
+            "INSERT INTO lehrer VALUES ( 'FiA',  'Fischer',   'Andreas',  'Herr' ); ")
+        db.execute(
+            "INSERT INTO lehrer VALUES ( 'Pohl', 'Pohl',      'Matthias', 'Herr' ); ")
+        db.execute(
+            "INSERT INTO lehrer VALUES ( 'Smy',  'Smykowski', 'Adam',     'Dr'   ); ")
+        db.execute(
+            "INSERT INTO lehrer VALUES ( 'Dob',  'Dobberow',  'Anja',     'Frau' ); ")
+        db.execute(
+            "INSERT INTO lehrer VALUES ( 'Bad',  'Bader',     'Mark',     'Dr'   ); ")
+        db.execute(
+            "INSERT INTO lehrer VALUES ( 'Hen',  'Henke',     'Jörg',     'Herr' ); ")
 
         print("\nLehrer\n")
         print(db.execute("SELECT * FROM lehrer ORDER BY Kuerzel;"))
 
-        db.execute("INSERT INTO raum ( Haus, Nummer, Plaetze, Lehrer ) VALUES ( 'F', '60', '17', 'FiA' ); ")
-        db.execute("INSERT INTO raum ( Haus, Nummer, Plaetze, Lehrer ) VALUES ( 'A', '5', '24', 'Pohl' ); ")
-        db.execute("INSERT INTO raum ( Haus, Nummer, Plaetze ) VALUES ( 'A', '3', '17' ); ")
-        db.execute("INSERT INTO raum ( Haus, Nummer, Lehrer ) VALUES ( 'A', '53', 'Dob' ); ")
+        db.execute(
+            "INSERT INTO raum ( Haus, Nummer, Plaetze, Lehrer ) VALUES ( 'F', '60', '17', 'FiA' ); ")
+        db.execute(
+            "INSERT INTO raum ( Haus, Nummer, Plaetze, Lehrer ) VALUES ( 'A', '5', '24', 'Pohl' ); ")
+        db.execute(
+            "INSERT INTO raum ( Haus, Nummer, Plaetze ) VALUES ( 'A', '3', '17' ); ")
+        db.execute(
+            "INSERT INTO raum ( Haus, Nummer, Lehrer ) VALUES ( 'A', '53', 'Dob' ); ")
 
         print("\nRaum\n")
         print(db.execute("SELECT * FROM raum ORDER BY Haus, Nummer;"))
@@ -357,10 +376,14 @@ if __name__ == "__main__":
         print("\nKurs\n")
         print(db.execute("SELECT * FROM kurs ORDER BY Bezeichnung;"))
 
-        db.execute("INSERT INTO besucht ( Schueler, Kurs ) VALUES ( '1', 'gdeu5_16' ); ")
-        db.execute("INSERT INTO besucht ( Schueler, Kurs ) VALUES ( '2', 'ginf60_19' ); ")
-        db.execute("INSERT INTO besucht ( Schueler, Kurs ) VALUES ( '3', 'gds5_17' ); ")
-        db.execute("INSERT INTO besucht ( Schueler, Kurs ) VALUES ( '4', 'gche5_19' ); ")
+        db.execute(
+            "INSERT INTO besucht ( Schueler, Kurs ) VALUES ( '1', 'gdeu5_16' ); ")
+        db.execute(
+            "INSERT INTO besucht ( Schueler, Kurs ) VALUES ( '2', 'ginf60_19' ); ")
+        db.execute(
+            "INSERT INTO besucht ( Schueler, Kurs ) VALUES ( '3', 'gds5_17' ); ")
+        db.execute(
+            "INSERT INTO besucht ( Schueler, Kurs ) VALUES ( '4', 'gche5_19' ); ")
 
         print("\nBesucht\n")
         print(db.execute("SELECT * FROM besucht ORDER BY Schueler;"))

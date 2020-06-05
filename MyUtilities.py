@@ -1,5 +1,8 @@
 from tkinter import *
-from typing import Callable, Union, Sequence
+from typing import Callable, Union, Sequence, Dict, AnyStr
+
+# type: Dict
+# type: AnyStr
 
 SeqOrReturnsSeq = Union[Sequence, Callable[[], Sequence]]
 

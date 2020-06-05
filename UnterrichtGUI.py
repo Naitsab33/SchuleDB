@@ -33,8 +33,8 @@ class UnterrichtGUI(BasisGUI):
                                          command=partial(self.eingabeFenster, name, keys, grouped))
             self.ausgabeMenu.add_command(label=name.capitalize(), command=partial(self.ausgabeFenster, name))
 
-    def eingabeFenster(self, table: AnyStr, restr_choices: Dict[AnyStr, Iterable[AnyStr]] = None,
-                       combined: Iterable[AnyStr] = None) -> None:
+    def eingabeFenster(self, table: str, restr_choices: Dict[str, SeqOrReturnsSeq] = None,
+                       combined: Dict[str, Sequence[str]] = None) -> None:
         """
         Erstellt ein Fenster für die Dateneingabe für die Tabelle `table` der eigenen Datenbank `self.db`
         restr_choices gibt eine Möglichkeit Standardwerte für einzelne Spalten zu übergeben:
@@ -44,7 +44,7 @@ class UnterrichtGUI(BasisGUI):
         fenster = EingabeUniversal(self.db, table, restr_choices, combined)
         self.ergGUIs.append(fenster)
 
-    def ausgabeFenster(self, table: AnyStr, sel: AnyStr = "1=1"):
+    def ausgabeFenster(self, table: AnyStr, sel: str = "1=1"):
         """
         Erstellt ein Fenster in dem die gegebene Tabelle `table` mit der Selektion `sel` ausgegeben wird
         """

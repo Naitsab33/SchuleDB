@@ -8,9 +8,9 @@ from MyUtilities import *
 
 
 class EingabeUniversal(MasterGUI):
-    def __init__(self, db: DB_Tool, table_name: AnyStr,
-                 restricted_choices: Dict[AnyStr, Union[Iterable[AnyStr], Callable[[], Iterable[AnyStr]]]] = None,
-                 combined: Dict[AnyStr, Iterable[AnyStr]] = None):
+    def __init__(self, db: DB_Tool, table_name: str,
+                 restricted_choices: Dict[str, SeqOrReturnsSeq] = None,
+                 combined: Dict[str, Sequence[str]] = None):
         """
                 Ein Fenster für die Dateneingabe für die Tabelle `table_name` der Datenbank `db`.
                 `restr_choices` gibt eine Möglichkeit Standardwerte für einzelne Spalten zu übergeben:
@@ -22,20 +22,20 @@ class EingabeUniversal(MasterGUI):
         # Erstellung des Grundfensters
         super(EingabeUniversal, self).__init__()
         self.db = db
-        self.table_name = table_name
-        self.restricted_choices = restricted_choices or {}
+        self.table_name: str = table_name
+        self.restricted_choices: Dict = restricted_choices or {}
         t = 24
         self.ft = ('Arial', t)
-        self.title(f'{table_name.capitalize()}-Erfassung')
+        self.title(f'{self.table_name.capitalize()}-Erfassung')
         self.labels = {}
         self.vars = {}
         self.varTraces = {}
         self.entries = {}
         self.dropdowns = {}
-        self.combined = combined
+        self.combined = combined or {}
 
         # Tabelleninfo (funzt nur für SQLite)
-        fullTableSQL = f"SELECT name, type FROM PRAGMA_TABLE_INFO('{table_name}');"
+        fullTableSQL = f"SELECT name, type FROM PRAGMA_TABLE_INFO('{self.table_name}');"
         self.cols = dict(self.db.execute(fullTableSQL)[1])
         # Erstellen der Buttons
         self.einfuegen = Button(master=self, text='In DB eintragen', font=self.ft, bg='light green',
@@ -45,7 +45,7 @@ class EingabeUniversal(MasterGUI):
         # Einfügen der Eingabefelder
         for index, column in enumerate(self.cols.keys()):
             # Wenn es ein Autoincrement hat, wird die Spalte ignoriert
-            if self.db.execute(f"SELECT pk FROM PRAGMA_TABLE_INFO('{table_name}');")[1][index][0] == "1":
+            if self.db.execute(f"SELECT pk FROM PRAGMA_TABLE_INFO('{self.table_name}');")[1][index][0] == "1":
                 continue
             # Labelerstellung
             self.labels[column] = Label(self, text=column.capitalize(), font=self.ft)
@@ -74,7 +74,7 @@ class EingabeUniversal(MasterGUI):
             rowcounter += 1
         # Aktivierung der Traces auf den entsprechenden Variablen
         for column, callbackFunc in self.varTraces.items():
-            self.vars[column].trace_add("write", callbackFunc)
+            self.vars[column].trace_add("write", callbackFunc)  # type: ignore
         self.refresh()
         # Knöpfe Bla Bla
         rowcounter += 1
@@ -87,7 +87,7 @@ class EingabeUniversal(MasterGUI):
 
         self.focus_force()
 
-    def combinedVarSetter(self, _, __, ___, column: AnyStr, table: Iterable[AnyStr]):
+    def combinedVarSetter(self, _, __, ___, column: str, table: str):
         """
         Setzt alle verbundenen Optionmenus (gleiche Tabelle `table`) auf den entsprechenden Wert des Optionmenu von `column`
         @param _: Benötigt für Trace-Callback, man braucht den Wert jedoch nur für Debugzwecke.
@@ -98,9 +98,9 @@ class EingabeUniversal(MasterGUI):
         """
         for fKey in self.combined[table]:
             if fKey != column:
-                self.vars[fKey].trace_remove("write", self.vars[fKey].trace_info()[0][1])
+                self.vars[fKey].trace_remove("write", self.vars[fKey].trace_info()[0][1])  # type: ignore
                 self.vars[fKey].set(self.getChoices(fKey)[self.getChoices(column).index(str(self.vars[column].get()))])
-                self.vars[fKey].trace_add("write", self.varTraces[fKey])
+                self.vars[fKey].trace_add("write", self.varTraces[fKey])  # type: ignore
 
     def insert(self):
         """
@@ -156,9 +156,9 @@ class EingabeUniversal(MasterGUI):
         @return:
         """
         value = self.restricted_choices[column]
-        if isinstance(value, Iterable):
+        if isinstance(value, Sequence):
             return value
-        elif isinstance(value, Callable):
+        elif isinstance(value, Callable):  # type: ignore
             return value()
         else:
             raise TypeError("column must be Iterable or Callable")
